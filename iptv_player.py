@@ -1353,16 +1353,23 @@ class MainWindow(QMainWindow):
         self._relaunch()
 
     def _relaunch(self):
-        win = QMainWindow()
-        win.setWindowTitle(f"{APP_NAME} — Connexion")
-        win.setWindowIcon(make_icon())
-        win.setMinimumSize(640, 520)
-        win.setStyleSheet(STYLE)
-        lp = LoginPage(self.app_data, self.save_fn)
-        lp.login_ok.connect(lambda api, s: (win.close(), setattr(self, '_mw', MainWindow(api, self.app_data, self.save_fn))) or self._mw.setStyleSheet(STYLE) or self._mw.show())
-        win.setCentralWidget(lp)
-        win.show()
-        self._lw = win
+    self._login_win = QMainWindow()
+    self._login_win.setWindowTitle(f"{APP_NAME} — Connexion")
+    self._login_win.setWindowIcon(make_icon())
+    self._login_win.setMinimumSize(640, 520)
+    self._login_win.setStyleSheet(STYLE)
+
+    lp = LoginPage(self.app_data, self.save_fn)
+
+    def go_main(api, s):
+        self._mw = MainWindow(api, self.app_data, self.save_fn)
+        self._mw.setStyleSheet(STYLE)
+        self._mw.show()
+        self._login_win.hide()
+
+    lp.login_ok.connect(go_main)
+    self._login_win.setCentralWidget(lp)
+    self._login_win.show()
 
     def closeEvent(self, e):
         self.player.stop()
@@ -1403,13 +1410,12 @@ if __name__ == "__main__":
     lp = LoginPage(app_data, save)
 
     def on_login(api, server):
-        win.close()
-        mw = MainWindow(api, app_data, save)
-        mw.setStyleSheet(STYLE)
-        mw.show()
-        app._mw = mw
+    app._mw = MainWindow(api, app_data, save)
+    app._mw.setStyleSheet(STYLE)
+    app._mw.show()
+    win.hide()
 
     lp.login_ok.connect(on_login)
-    win.setCentralWidget(lp)
-    win.show()
-    sys.exit(app.exec_())
+win.setCentralWidget(lp)
+win.show()
+sys.exit(app.exec_())
