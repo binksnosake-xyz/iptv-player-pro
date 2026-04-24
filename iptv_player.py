@@ -173,10 +173,25 @@ QPushButton[active="true"] {
 # ─── XTREAM API ───────────────────────────────────────────────────────────────
 class XtreamAPI:
     def __init__(self, server, username, password):
-        self.server = server.rstrip("/")
-        self.username = username
-        self.password = password
-        self.base = "%s/player_api.php?username=%s&password=%s" % (self.server, self.username, self.password)
+        self.server = self._normalize_server(server)
+        self.username = self._safe_text(username)
+        self.password = self._safe_text(password)
+        self.base = self.server + "/player_api.php?username=" + self.username + "&password=" + self.password
+
+    def _safe_text(self, x):
+        # Force pure string digit-by-digit to avoid scientific notation
+        raw = x if isinstance(x, str) else repr(x)
+        # Rebuild char by char to guarantee no float conversion
+        result = ""
+        for c in raw:
+            result += c
+        return result.strip()
+
+    def _normalize_server(self, s):
+        s = (s if isinstance(s, str) else str(s)).strip().rstrip("/")
+        if not s.startswith("http://") and not s.startswith("https://"):
+            s = "http://" + s
+        return s
 
     def _get(self, url, timeout=20):
         try:
@@ -228,7 +243,7 @@ class LoginWorker(QThread):
         self.servers = servers; self.u = u; self.p = p
     def run(self):
         for s in self.servers:
-            api = XtreamAPI(s, self.u, self.p)
+            api = XtreamAPI(s, str(self.u).strip(), str(self.p).strip())
             info = api.get_info()
             if info and "user_info" in info:
                 self.ok.emit(api, info)
