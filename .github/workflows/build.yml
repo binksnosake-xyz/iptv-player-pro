@@ -1,0 +1,58 @@
+name: Build IPTV Player Pro (Windows EXE)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install VLC (64-bit)
+        run: choco install vlc --version=3.0.20 -y
+        shell: pwsh
+
+      - name: Install Python dependencies
+        run: pip install PyQt5 requests python-vlc pyinstaller
+
+      - name: Copy VLC DLLs next to script
+        run: |
+          $vlcDir = "C:\Program Files\VideoLAN\VLC"
+          Copy-Item "$vlcDir\libvlc.dll" .
+          Copy-Item "$vlcDir\libvlccore.dll" .
+          Copy-Item "$vlcDir\plugins" . -Recurse
+        shell: pwsh
+
+      - name: Build EXE with PyInstaller
+        run: |
+          pyinstaller `
+            --onedir `
+            --windowed `
+            --name "IPTV Player Pro" `
+            --add-data "libvlc.dll;." `
+            --add-data "libvlccore.dll;." `
+            --add-data "plugins;plugins" `
+            --hidden-import vlc `
+            iptv_player.py
+        shell: pwsh
+
+      - name: Zip the output
+        run: Compress-Archive -Path "dist\IPTV Player Pro" -DestinationPath "IPTV-Player-Pro-Windows.zip"
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: IPTV-Player-Pro-Windows
+          path: IPTV-Player-Pro-Windows.zip
+          retention-days: 30
