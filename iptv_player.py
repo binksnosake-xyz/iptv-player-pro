@@ -1409,7 +1409,7 @@ if __name__ == "__main__":
     win.setStyleSheet(STYLE)
     lp = LoginPage(app_data, save)
 
-        def on_login(api, server):
+    def on_login(api, server):
         app._mw = MainWindow(api, app_data, save)
         app._mw.setStyleSheet(STYLE)
         app._mw.show()
