@@ -226,15 +226,6 @@ class XtreamAPI:
     def episode_url(self, sid, ext="mp4"): return f"{self.server}/series/{self.username}/{self.password}/{sid}.{ext}"
 
 # ─── WORKERS ─────────────────────────────────────────────────────────────────
-class Worker(QThread):
-    done = pyqtSignal(object)
-    def __init__(self, fn, *args):
-        super().__init__()
-        self.fn = fn; self.args = args
-    def run(self):
-        try: self.done.emit(self.fn(*self.args))
-        except: self.done.emit(None)
-
 class LoginWorker(QThread):
     ok = pyqtSignal(object, dict)
     fail = pyqtSignal()
@@ -245,13 +236,12 @@ class LoginWorker(QThread):
         for s in self.servers:
             api = XtreamAPI(s, str(self.u).strip(), str(self.p).strip())
             info = api.get_info()
-print(api.base)
-print(info)
-if info and "user_info" in info:
+            print(api.base)
+            print(info)
+            if info and "user_info" in info:
                 self.ok.emit(api, info)
                 return
         self.fail.emit()
-
 # ─── APP ICON ─────────────────────────────────────────────────────────────────
 def make_icon(size=64):
     pix = QPixmap(size, size)
