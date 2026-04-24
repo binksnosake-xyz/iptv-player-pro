@@ -176,7 +176,7 @@ class XtreamAPI:
         self.server = server.rstrip("/")
         self.username = username
         self.password = password
-        self.base = f"{self.server}/player_api.php?username={username}&password={password}"
+        self.base = "%s/player_api.php?username=%s&password=%s" % (self.server, self.username, self.password)
 
     def _get(self, url, timeout=20):
         try:
