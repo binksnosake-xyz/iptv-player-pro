@@ -1353,23 +1353,23 @@ class MainWindow(QMainWindow):
         self._relaunch()
 
     def _relaunch(self):
-    self._login_win = QMainWindow()
-    self._login_win.setWindowTitle(f"{APP_NAME} — Connexion")
-    self._login_win.setWindowIcon(make_icon())
-    self._login_win.setMinimumSize(640, 520)
-    self._login_win.setStyleSheet(STYLE)
+        self._login_win = QMainWindow()
+        self._login_win.setWindowTitle(f"{APP_NAME} — Connexion")
+        self._login_win.setWindowIcon(make_icon())
+        self._login_win.setMinimumSize(640, 520)
+        self._login_win.setStyleSheet(STYLE)
 
-    lp = LoginPage(self.app_data, self.save_fn)
+        lp = LoginPage(self.app_data, self.save_fn)
 
-    def go_main(api, s):
-        self._mw = MainWindow(api, self.app_data, self.save_fn)
-        self._mw.setStyleSheet(STYLE)
-        self._mw.show()
-        self._login_win.hide()
+        def go_main(api, s):
+            self._mw = MainWindow(api, self.app_data, self.save_fn)
+            self._mw.setStyleSheet(STYLE)
+            self._mw.show()
+            self._login_win.hide()
 
-    lp.login_ok.connect(go_main)
-    self._login_win.setCentralWidget(lp)
-    self._login_win.show()
+        lp.login_ok.connect(go_main)
+        self._login_win.setCentralWidget(lp)
+        self._login_win.show()
 
     def closeEvent(self, e):
         self.player.stop()
