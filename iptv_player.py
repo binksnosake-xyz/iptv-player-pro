@@ -236,8 +236,8 @@ class LoginWorker(QThread):
         for s in self.servers:
             api = XtreamAPI(s, str(self.u).strip(), str(self.p).strip())
             info = api.get_info()
-            print("BASE=", api.base)
-print("INFO=", info)
+            print(api.base)
+            print(info)
             if info and "user_info" in info:
                 self.ok.emit(api, info)
                 return
